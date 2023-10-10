@@ -9,6 +9,8 @@ import { PasswordModule } from 'primeng/password';
 import { InputTextModule } from 'primeng/inputtext';
 import {ToastModule} from "primeng/toast";
 import {RadioButtonModule} from "primeng/radiobutton";
+import {AutoCompleteModule} from "primeng/autocomplete";
+import {InputMaskModule} from "primeng/inputmask";
 
 @NgModule({
     imports: [
@@ -21,7 +23,9 @@ import {RadioButtonModule} from "primeng/radiobutton";
         PasswordModule,
         ToastModule,
         ReactiveFormsModule,
-        RadioButtonModule
+        RadioButtonModule,
+        AutoCompleteModule,
+        InputMaskModule
     ],
     declarations: [SignupComponent]
 })

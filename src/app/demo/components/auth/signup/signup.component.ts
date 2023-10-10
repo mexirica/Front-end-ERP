@@ -4,6 +4,7 @@ import { AuthService } from "../../../service/auth/auth.service";
 import {Router} from "@angular/router";
 import { MessageService } from "primeng/api";
 import {FormBuilder, FormGroup, Validators} from "@angular/forms";
+import {LocalidadesService} from "../../../service/localidades/Localidades.service";
 @Component({
     selector: 'app-login',
     templateUrl: './signup.component.html',
@@ -25,20 +26,54 @@ export class SignupComponent implements OnInit{
         { name: 'Feminino', key: 'F' },
     ];
 
+    estados: string[] | string | undefined
+
+    cidades: string[] | string | undefined
+
+    estadosFiltrados: any[] = []
+
+    cidadesFiltradas: any[] = []
+
     constructor(public layoutService: LayoutService,
                 private service: MessageService,
                 private router: Router,
                 private authService: AuthService,
-                private formBuilder: FormBuilder) { }
+                private formBuilder: FormBuilder,
+                private localidadeService: LocalidadesService) { }
 
     ngOnInit(): void {
         this.signupForm = this.formBuilder.group({
             email: ['', Validators.required, Validators.email],
+            nome: ["", Validators.required],
             password: ['', Validators.required, Validators.minLength(8), Validators.pattern("^(?=.*[A-Z])(?=.*\\d)(?=.*[@#$%^&+=!]).*$") ],
-            sexo: ['', Validators.required]
+            sexo: ['', Validators.required],
+            endereco: ["", Validators.required],
+            bairro: ["", Validators.required],
+            cidade: [{value: "", disabled: true},Validators.required],
+            estado: ["", Validators.required]
 
         });
+
+        this.localidadeService.getAllEstados().subscribe({
+            next: (estados) => {
+                this.estados = estados;
+            },
+            error: (err) => this.showErrorViaToast("Erro no formulário", "Não foi possível carregar os Estados")
+        });
+
+
+
+        this.signupForm.get('estado').valueChanges.subscribe(novoValor => {
+            this.localidadeService.getMunicipioPorEstados(this.signupForm.get("estado")?.value).subscribe({
+                next: (res) => {
+                    this.cidades = res
+                },
+                error: (err) => this.showErrorViaToast("Erro no formulário", "Não foi possível carregar os Estados")
+            })
+            this.signupForm.get('cidade').enable()
+        })
     }
+
 
 
     signup(){
@@ -61,6 +96,30 @@ export class SignupComponent implements OnInit{
         this.service.add({ key: 'tst', severity: 'error', summary: cabecalho, detail: erro });
     }
 
+    filterEstado(event: any) {
+        const filtered: any[] = [];
+        const query = event.query;
+        for (let i = 0; i < this.estados.length; i++) {
+            const estado = this.estados[i];
+            if (estado.toLowerCase().indexOf(query.toLowerCase()) == 0) {
+                filtered.push(estado);
+            }
+        }
 
-    protected readonly console = console;
+        this.estadosFiltrados = filtered;
+    }
+
+    filterCidade(event: any) {
+        const filtered: any[] = [];
+        const query = event.query;
+        for (let i = 0; i < this.cidades.length; i++) {
+            const cidade = this.cidades[i];
+            if (cidade.toLowerCase().indexOf(query.toLowerCase()) == 0) {
+                filtered.push(cidade);
+            }
+        }
+
+        this.cidadesFiltradas = filtered;
+    }
+
 }
